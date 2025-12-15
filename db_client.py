@@ -1,5 +1,23 @@
 from typing import Any
 import mysql.connector
+from pydantic import BaseModel
+
+
+class AgeCategory(BaseModel):
+    name: str
+    minage: int
+    maxage: int
+
+
+class SkiCategory(BaseModel):
+    name: str
+
+
+class PriceEntry(BaseModel):
+    skiid: int
+    agecatid: int
+    price: int
+
 
 class DatabaseClient:
     def __init__(self, host: str = "localhost", user: str = "test", password: str = "tester", database: str = "ski_db") -> None:
@@ -11,10 +29,76 @@ class DatabaseClient:
         )
         self.cursor = self.connection.cursor()
 
+
     def execute_query(self, query: str) -> Any:
         self.cursor.execute(query)
         return self.cursor.fetchall()
 
+
     def close(self) -> None:
         self.cursor.close()
         self.connection.close()
+
+
+    def fetch_price_list(self) -> list[PriceEntry]:
+        stored_prices = self.execute_query(
+            "SELECT skiid, agecatid, price FROM prices " \
+            "WHERE skiid IS NOT NULL " \
+            "AND agecatid IS NOT NULL " \
+            "AND price IS NOT NULL;"
+            )
+
+        prices: list[PriceEntry] = []
+        for entry in stored_prices:
+            if not len(entry) == 3:
+                print(f"Missing fields in entry {entry}, skipping")
+                continue
+            if not all(isinstance(i, int) for i in entry):
+                print(f"Invalid type in entry {entry}, skipping")
+                continue
+            
+            prices.append(PriceEntry(skiid=int(entry[0]), agecatid=int(entry[1]), price=int(entry[2])))
+        return prices
+
+    def fetch_age_categories(self) -> dict[int, AgeCategory]:
+        
+        stored_age_categories = self.execute_query(
+            "SELECT id, name, minage, maxage FROM age_category " \
+            "WHERE id IS NOT NULL " \
+            "AND name IS NOT NULL " \
+            "AND minage IS NOT NULL " \
+            "AND maxage IS NOT NULL;"
+            )
+
+        ageCategories: dict[int, AgeCategory] = {}
+        for entry in stored_age_categories:
+            if not len(entry) == 4:
+                print(f"Missing fields in entry {entry}, skipping")
+                continue
+
+            if isinstance(entry[0], int) and isinstance(entry[2], int) and isinstance(entry[3], int):
+                ageCategories[int(entry[0])] = AgeCategory(name=entry[1], minage=int(entry[2]), maxage=int(entry[3]))
+            else:
+                print(f"Invalid type in entry {entry}, skipping")
+
+        return ageCategories
+
+
+    def fetch_ski_categories(self) -> dict[int, SkiCategory]:
+        stored_ski_categories = self.execute_query(
+            "SELECT id, name FROM ski_category " \
+            "WHERE id IS NOT NULL " \
+            "AND name IS NOT NULL;"
+            )
+
+        skiCategories: dict[int, SkiCategory] = {}
+        for entry in stored_ski_categories:
+            if not len(entry) == 2:
+                print(f"Missing fields in entry {entry}, skipping")
+                continue
+
+            if isinstance(entry[0], int):
+                skiCategories[int(entry[0])] = SkiCategory(name=entry[1])
+            else:
+                print(f"Invalid type in entry {entry}, skipping")
+        return skiCategories
