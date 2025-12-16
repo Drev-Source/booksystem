@@ -22,6 +22,7 @@ class PriceEntry(BaseModel):
     price: int
 
 
+#TODO Should probably use fault handling with exceptions here
 class DatabaseClient:
     def __init__(self, host: str = "localhost", user: str = "test", password: str = "tester", database: str = "ski_db") -> None:
         self.connection = mysql.connector.connect(

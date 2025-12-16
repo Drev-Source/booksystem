@@ -14,6 +14,8 @@ class Booking(BaseModel):
     total_price: int
 
 
+#TODO Could probably do a better fault handling using exceptions here and not None returns
+#TODO Incorporate destination weather data into price calculation
 def calculate_traveler_price(prices: list[PriceEntry], age_category_id: int, ski_category_id: int) -> int | None:
     for record in prices:
         if record.agecatid == age_category_id and record.skiid == ski_category_id:
@@ -21,6 +23,8 @@ def calculate_traveler_price(prices: list[PriceEntry], age_category_id: int, ski
     return None
 
 
+#TODO Maybe use exceptions here and not prints?
+#TODO Incorporate destination weather data into price calculation
 def calculate_booking_price(
     traveler_bookings: list[TravelerBooking],
 ) -> int:
@@ -34,6 +38,7 @@ def calculate_booking_price(
     return total_price
 
 
+#TODO Could probably do a better fault handling using exceptions here and not None returns
 def create_booking(
     travelers: int,
     prices: list[PriceEntry],
@@ -67,7 +72,8 @@ def create_booking(
     return Booking(traveler_bookings=traveler_bookings, total_price=total_price)
 
 
-def start_booking() -> Booking:
+#TODO Could probably do a better fault handling using exceptions here and not None returns
+def start_booking() -> Booking | None:
     # Fetch latest data
     db_client = DatabaseClient()
     prices = db_client.fetch_price_list()
@@ -79,7 +85,7 @@ def start_booking() -> Booking:
 
     travelers = ask_for_amount_of_travelers()
     if not travelers:
-        return
+        return None
 
     return create_booking(travelers, prices, age_categories, ski_categories)
 

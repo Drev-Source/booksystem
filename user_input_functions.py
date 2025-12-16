@@ -3,8 +3,8 @@ from front_end_functions import print_age_categories, print_ski_categories
 
 
 def get_age_category_id(age: int, age_categories: dict[int, AgeCategory]) -> int | None:
-    # What if the age fits multiple categories?
-    # What if the age fits no category?
+    #TODO What if the age fits multiple categories?
+    #TODO What if the age fits no category?
     for age_category_id, age_category in age_categories.items():
         if age_category.minage <= age <= age_category.maxage:
             return age_category_id
@@ -12,6 +12,7 @@ def get_age_category_id(age: int, age_categories: dict[int, AgeCategory]) -> int
     return None
 
 
+#TODO Could probably do a better fault handling using exceptions here and not None returns
 def wait_for_user_input(prompt: str) -> str:
     print(prompt)
     print("You can type 'exit' or 'quit' to leave.")
@@ -31,6 +32,7 @@ def wait_for_user_input(prompt: str) -> str:
         return line
 
 
+#TODO Could probably do a better fault handling using exceptions here and not None returns
 def ask_for_amount_of_travelers() -> int | None:
     prompt = "Please enter the amount of travelers:"
     line = wait_for_user_input(prompt)
@@ -45,6 +47,7 @@ def ask_for_amount_of_travelers() -> int | None:
         return ask_for_amount_of_travelers()
 
 
+#TODO Could probably do a better fault handling using exceptions here and not None returns
 def ask_for_age(age_categories: dict[int, AgeCategory]) -> int | None:
     print_age_categories(age_categories)
     prompt = "Please enter the age of traveler:"
@@ -60,6 +63,7 @@ def ask_for_age(age_categories: dict[int, AgeCategory]) -> int | None:
         return ask_for_age(age_categories)
 
 
+#TODO Could probably do a better fault handling using exceptions here and not None returns
 def ask_for_ski_category(ski_categories: dict[int, SkiCategory]) -> int | None:
     print_ski_categories(ski_categories)
     prompt = "Please enter the ski category ID from the list above:"

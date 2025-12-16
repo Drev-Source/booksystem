@@ -3,6 +3,7 @@ from booking import Booking, print_booking, start_booking
 from front_end_functions import list_latest_prices, print_menu
 
 
+#Should use try except for fault handling here instead of Nones
 def main() -> None:
     print_menu()
     current_booking: Booking | None = None
