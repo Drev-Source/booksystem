@@ -1,5 +1,6 @@
-from typing import Any
 import mysql.connector
+
+from typing import Any
 from pydantic import BaseModel
 
 
