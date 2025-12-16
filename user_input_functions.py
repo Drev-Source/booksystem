@@ -1,26 +1,13 @@
 from db_client import AgeCategory, SkiCategory
+from front_end_functions import print_age_categories, print_ski_categories
 
 
-def print_age_categories(ageCategories: dict[int, AgeCategory]) -> None:
-    print("Age Categories:")
-    for agecatid, agecat in ageCategories.items():
-        print(f"{agecatid}: {agecat.name} ({agecat.minage}-{agecat.maxage})")
-    print("\n")
-
-
-def print_ski_categories(skiCategories: dict[int, SkiCategory]) -> None:
-    print("Ski Categories:")
-    for skicatid, skicat in skiCategories.items():
-        print(f"{skicatid}: {skicat.name}")
-    print("\n")
-
-
-def get_age_category_id(age: int, ageCategories: dict[int, AgeCategory]) -> int | None:
+def get_age_category_id(age: int, age_categories: dict[int, AgeCategory]) -> int | None:
     # What if the age fits multiple categories?
     # What if the age fits no category?
-    for agecatid, agecat in ageCategories.items():
-        if agecat.minage <= age <= agecat.maxage:
-            return agecatid
+    for age_category_id, age_category in age_categories.items():
+        if age_category.minage <= age <= age_category.maxage:
+            return age_category_id
     print("No age category found for this age. Self destructing booking process.\n")
     return None
 
@@ -58,23 +45,23 @@ def ask_for_amount_of_travelers() -> int | None:
         return ask_for_amount_of_travelers()
 
 
-def ask_for_age(ageCategories: dict[int, AgeCategory]) -> int | None:
-    print_age_categories(ageCategories)
+def ask_for_age(age_categories: dict[int, AgeCategory]) -> int | None:
+    print_age_categories(age_categories)
     prompt = "Please enter the age of traveler:"
     line = wait_for_user_input(prompt)
 
     if line is None:
         return None
     elif line.isdigit() and int(line) >= 0:
-        age_category = get_age_category_id(int(line), ageCategories)
+        age_category = get_age_category_id(int(line), age_categories)
         return age_category
     else:
         print(f"Invalid input: {line}, please enter age within listed ranges")
-        return ask_for_age(ageCategories)
+        return ask_for_age(age_categories)
 
 
-def ask_for_ski_category(skiCategories: dict[int, SkiCategory]) -> int | None:
-    print_ski_categories(skiCategories)
+def ask_for_ski_category(ski_categories: dict[int, SkiCategory]) -> int | None:
+    print_ski_categories(ski_categories)
     prompt = "Please enter the ski category ID from the list above:"
     line = wait_for_user_input(prompt)
 
@@ -84,4 +71,4 @@ def ask_for_ski_category(skiCategories: dict[int, SkiCategory]) -> int | None:
         return int(line)
     else:
         print(f"Invalid input: {line}, please enter a listed number")
-        return ask_for_ski_category(skiCategories)
+        return ask_for_ski_category(ski_categories)

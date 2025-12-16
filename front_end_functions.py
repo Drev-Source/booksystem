@@ -12,36 +12,49 @@ def print_menu() -> None:
 
 def list_prices(
     prices: list[PriceEntry],
-    ageCategories: dict[int, AgeCategory],
-    skiCategories: dict[int, SkiCategory],
+    age_categories: dict[int, AgeCategory],
+    ski_categories: dict[int, SkiCategory],
 ) -> None:
     print("\nPrice List:\n")
 
-    column_ids = skiCategories.keys()
+    for skiid in ski_categories.keys():
+        ski_category = ski_categories[skiid]
+        column_name = f"{ski_category.name}"
+        print(column_name)
 
-    for col_id in column_ids:
-        ski_cat = skiCategories[col_id]
-        column = f"{ski_cat.name}"
-        print(column)
-
-        sorted_price_entries = [price for price in prices if price.skiid == col_id]
-        for sorted_entry in sorted_price_entries:
-            age_cat = ageCategories.get(sorted_entry.agecatid)
+        filtered_prices = [price for price in prices if price.skiid == skiid]
+        for entry in filtered_prices:
+            age_cat = age_categories.get(entry.agecatid)
             if age_cat:
                 row = f"{age_cat.name} ({age_cat.minage}-{age_cat.maxage})"
                 while len(row) < 20:
                     row += " "
-                row += f"|   Pris: {sorted_entry.price} SEK"
+                row += f"|   Pris: {entry.price} SEK"
                 print("-"*len(row))
                 print(row)
         print("\n")
 
 
 def list_latest_prices() -> None:
+    # Fetch latest data
     db_client = DatabaseClient()
     prices = db_client.fetch_price_list()
-    ageCategories = db_client.fetch_age_categories()
-    skiCategories = db_client.fetch_ski_categories()
+    age_categories = db_client.fetch_age_categories()
+    ski_categories = db_client.fetch_ski_categories()
     db_client.close()
 
-    list_prices(prices, ageCategories, skiCategories)
+    list_prices(prices, age_categories, ski_categories)
+
+
+def print_age_categories(age_categories: dict[int, AgeCategory]) -> None:
+    print("Age Categories:")
+    for age_category_id, age_category in age_categories.items():
+        print(f"{age_category_id}: {age_category.name} ({age_category.minage}-{age_category.maxage})")
+    print("\n")
+
+
+def print_ski_categories(ski_categories: dict[int, SkiCategory]) -> None:
+    print("Ski Categories:")
+    for ski_category_id, ski_category in ski_categories.items():
+        print(f"{ski_category_id}: {ski_category.name}")
+    print("\n")

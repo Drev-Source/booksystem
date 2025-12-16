@@ -37,28 +37,28 @@ def calculate_booking_price(
 def create_booking(
     travelers: int,
     prices: list[PriceEntry],
-    ageCategories: dict[int, AgeCategory],
-    skiCategories: dict[int, SkiCategory],
+    age_categories: dict[int, AgeCategory],
+    ski_categories: dict[int, SkiCategory],
 ) -> Booking | None:
     traveler_bookings: list[TravelerBooking] = []
     for traveler in range(1, travelers+1):
         print(f"Traveler {traveler}/{travelers}:")
 
-        age_category_id = ask_for_age(ageCategories)
+        age_category_id = ask_for_age(age_categories)
         if not age_category_id:
             return
 
-        subset_age_categories = {k: ageCategories[k] for k in ageCategories if k == age_category_id}
-        list_prices(prices, subset_age_categories, skiCategories)
+        subset_age_categories = {k: age_categories[k] for k in age_categories if k == age_category_id}
+        list_prices(prices, subset_age_categories, ski_categories)
 
-        ski_category_id = ask_for_ski_category(skiCategories)
+        ski_category_id = ask_for_ski_category(ski_categories)
         if not ski_category_id:
             return
 
         traveler_bookings.append(
             TravelerBooking(
-                age_category=ageCategories[age_category_id],
-                ski_category=skiCategories[ski_category_id],
+                age_category=age_categories[age_category_id],
+                ski_category=ski_categories[ski_category_id],
                 price=calculate_traveler_price(prices, age_category_id, ski_category_id),
             )
             )
@@ -71,17 +71,17 @@ def start_booking() -> Booking:
     # Fetch latest data
     db_client = DatabaseClient()
     prices = db_client.fetch_price_list()
-    ageCategories = db_client.fetch_age_categories()
-    skiCategories = db_client.fetch_ski_categories()
+    age_categories = db_client.fetch_age_categories()
+    ski_categories = db_client.fetch_ski_categories()
     db_client.close()
 
-    list_prices(prices, ageCategories, skiCategories)
+    list_prices(prices, age_categories, ski_categories)
 
     travelers = ask_for_amount_of_travelers()
     if not travelers:
         return
 
-    return create_booking(travelers, prices, ageCategories, skiCategories)
+    return create_booking(travelers, prices, age_categories, ski_categories)
 
 
 def print_booking(booking: Booking) -> None:
