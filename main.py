@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 from db_client import AgeCategory, DatabaseClient, PriceEntry, SkiCategory
+from booking import Booking, TravelerBooking
 
 
-def print_menu():
+def print_menu() -> None:
     print("\nPlease enter the number of your choice\n")
     print("Menu:")
-    print("\"1\" list prices")
-    print("\"2\" create booking")
-    print("\"0\" exit\n")
+    print("\"1\" List prices")
+    print("\"2\" Create booking")
+    print("\"3\" Show current booking")
+    print("\"0\" Exit\n")
 
 
 def list_prices(
-        prices: list[PriceEntry],
-        ageCategories: dict[int, AgeCategory],
-        skiCategories: dict[int, SkiCategory],
-    ):
+    prices: list[PriceEntry],
+    ageCategories: dict[int, AgeCategory],
+    skiCategories: dict[int, SkiCategory],
+) -> None:
     print("\nPrice List:\n")
 
     column_ids = skiCategories.keys()
@@ -24,7 +26,7 @@ def list_prices(
         column = f"{ski_cat.name}"
         print(column)
 
-        sorted_price_entries = [price_entry for price_entry in prices if price_entry.skiid == col_id]
+        sorted_price_entries = [price for price in prices if price.skiid == col_id]
         for sorted_entry in sorted_price_entries:
             age_cat = ageCategories.get(sorted_entry.agecatid)
             if age_cat:
@@ -70,28 +72,39 @@ def ask_for_amount_of_travelers() -> int | None:
         return ask_for_amount_of_travelers()
 
 
-def print_age_categories(ageCategories: dict[int, AgeCategory]):
+def print_age_categories(ageCategories: dict[int, AgeCategory]) -> None:
     print("Age Categories:")
     for agecatid, agecat in ageCategories.items():
         print(f"{agecatid}: {agecat.name} ({agecat.minage}-{agecat.maxage})")
     print("\n")
 
 
-def ask_for_age_category(ageCategories: dict[int, AgeCategory]) -> int | None:
+def get_age_category_id(age: int, ageCategories: dict[int, AgeCategory]) -> int | None:
+    # What if the age fits multiple categories?
+    # What if the age fits no category?
+    for agecatid, agecat in ageCategories.items():
+        if agecat.minage <= age <= agecat.maxage:
+            return agecatid
+    print("No age category found for this age. Self destructing booking process.\n")
+    return None
+
+
+def ask_for_age(ageCategories: dict[int, AgeCategory]) -> int | None:
     print_age_categories(ageCategories)
-    prompt = "Please enter the age category ID from the list above:"
+    prompt = "Please enter the age of traveler:"
     line = wait_for_user_input(prompt)
 
     if line is None:
         return None
-    elif line.isdigit() and int(line) > 0:
-        return int(line)
+    elif line.isdigit() and int(line) >= 0:
+        age_category = get_age_category_id(int(line), ageCategories)
+        return age_category
     else:
-        print(f"Invalid input: {line}, please enter a listed number")
-        return ask_for_age_category(ageCategories)
+        print(f"Invalid input: {line}, please enter age within listed ranges")
+        return ask_for_age(ageCategories)
 
 
-def print_ski_categories(skiCategories: dict[int, SkiCategory]):
+def print_ski_categories(skiCategories: dict[int, SkiCategory]) -> None:
     print("Ski Categories:")
     for skicatid, skicat in skiCategories.items():
         print(f"{skicatid}: {skicat.name}")
@@ -112,48 +125,87 @@ def ask_for_ski_category(skiCategories: dict[int, SkiCategory]) -> int | None:
         return ask_for_ski_category(skiCategories)
 
 
-def create_booking(
-        prices: list[PriceEntry],
-        ageCategories: dict[int, AgeCategory],
-        skiCategories: dict[int, SkiCategory],
-    ) -> None:
-    travelers = ask_for_amount_of_travelers()
-    total_price = 0
-    if not travelers:
-        return
+def print_booking(booking: Booking) -> None:
+    print(f"\nBooking for {len(booking.traveler_bookings)} traveler(s)")
+    print("Prices:\n")
+    for traveler_booking in booking.traveler_bookings:
+        print(f"{traveler_booking.age_category.name} {traveler_booking.ski_category.name} {traveler_booking.price} SEK")
+    print(f"\nTotal Price: {booking.total_price} SEK\n")
 
+
+def calculate_traveler_price(prices: list[PriceEntry], age_category_id: int, ski_category_id: int) -> int | None:
+    for record in prices:
+        if record.agecatid == age_category_id and record.skiid == ski_category_id:
+            return record.price
+    return None
+
+
+def calculate_booking_price(
+    traveler_bookings: list[TravelerBooking],
+) -> int:
+    total_price = 0
+    for booking in traveler_bookings:
+        if booking.price:
+            total_price += booking.price
+        else:
+            print(f"No price found for this combination {booking.age_category.name} and {booking.ski_category.name}.")
+
+    return total_price
+
+
+def create_booking(
+    travelers: int,
+    prices: list[PriceEntry],
+    ageCategories: dict[int, AgeCategory],
+    skiCategories: dict[int, SkiCategory],
+) -> Booking | None:
+    traveler_bookings: list[TravelerBooking] = []
     for traveler in range(1, travelers+1):
         print(f"Traveler {traveler}/{travelers}:")
-        age_category = ask_for_age_category(ageCategories)
-        if not age_category:
+
+        age_category_id = ask_for_age(ageCategories)
+        if not age_category_id:
             return
 
-        print(f"Traveler {traveler} is {ageCategories[age_category].name}\n")
-        list_prices(prices, ageCategories, skiCategories)
-        ski_category = ask_for_ski_category(skiCategories)
-        if not ski_category:
+        subset_age_categories = {k: ageCategories[k] for k in ageCategories if k == age_category_id}
+        list_prices(prices, subset_age_categories, skiCategories)
+
+        ski_category_id = ask_for_ski_category(skiCategories)
+        if not ski_category_id:
             return
 
-        print(f"Selected {skiCategories[ski_category].name} for traveler {traveler}\n")
+        traveler_bookings.append(
+            TravelerBooking(
+                age_category=ageCategories[age_category_id],
+                ski_category=skiCategories[ski_category_id],
+                price=calculate_traveler_price(prices, age_category_id, ski_category_id),
+            )
+            )
 
-        traveler_price = [price for price in prices if price.agecatid == age_category and price.skiid == ski_category]
-        if traveler_price:
-            print(f"Price for this combination is {traveler_price[0].price} SEK.\n")
-            total_price += traveler_price[0].price
-        else:
-            print(f"No price found for this combination {ageCategories[age_category].name} and {skiCategories[ski_category].name}.")
-
-    print(f"Total price: {total_price} SEK\n")
+    total_price = calculate_booking_price(traveler_bookings)
+    return Booking(traveler_bookings=traveler_bookings, total_price=total_price)
 
 
-def main():
+def start_booking() -> Booking:
+    # Fetch latest data
     db_client = DatabaseClient()
     prices = db_client.fetch_price_list()
     ageCategories = db_client.fetch_age_categories()
     skiCategories = db_client.fetch_ski_categories()
     db_client.close()
 
+    list_prices(prices, ageCategories, skiCategories)
+
+    travelers = ask_for_amount_of_travelers()
+    if not travelers:
+        return
+
+    return create_booking(travelers, prices, ageCategories, skiCategories)
+    
+
+def main() -> None:
     print_menu()
+    current_booking: Booking | None = None
     while True:
         try:
             line = input('> ').strip()
@@ -166,15 +218,29 @@ def main():
 
         parts = line.split()
         cmd = parts[0].lower()
-        args = parts[1:]
-
+        
         if cmd in ('exit', 'quit', '0'):
             print('Bye.')
             break
         elif cmd == '1':
+            # Fetch latest data and list prices
+            db_client = DatabaseClient()
+            prices = db_client.fetch_price_list()
+            ageCategories = db_client.fetch_age_categories()
+            skiCategories = db_client.fetch_ski_categories()
+            db_client.close()
+
             list_prices(prices, ageCategories, skiCategories)
         elif cmd == '2':
-            create_booking(prices, ageCategories, skiCategories)
+            booking = start_booking()
+            if booking:
+                current_booking = booking
+                print("Successfully created a new booking:")
+        elif cmd == '3':
+            if current_booking:
+                print_booking(current_booking)
+            else:
+                print("There is no current booking.")
         else:
             print(f"Unknown command: {cmd}.")
 

@@ -4,12 +4,14 @@ from pydantic import BaseModel
 
 
 class AgeCategory(BaseModel):
+    id: int
     name: str
     minage: int
     maxage: int
 
 
 class SkiCategory(BaseModel):
+    id: int
     name: str
 
 
@@ -77,7 +79,7 @@ class DatabaseClient:
                 continue
 
             if isinstance(entry[0], int) and isinstance(entry[2], int) and isinstance(entry[3], int):
-                ageCategories[int(entry[0])] = AgeCategory(name=entry[1], minage=int(entry[2]), maxage=int(entry[3]))
+                ageCategories[int(entry[0])] = AgeCategory(id=int(entry[0]), name=entry[1], minage=int(entry[2]), maxage=int(entry[3]))
             else:
                 print(f"Invalid type in entry {entry}, skipping")
 
@@ -98,7 +100,7 @@ class DatabaseClient:
                 continue
 
             if isinstance(entry[0], int):
-                skiCategories[int(entry[0])] = SkiCategory(name=entry[1])
+                skiCategories[int(entry[0])] = SkiCategory(id=entry[0], name=entry[1])
             else:
                 print(f"Invalid type in entry {entry}, skipping")
         return skiCategories
