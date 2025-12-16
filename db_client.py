@@ -1,26 +1,7 @@
 import mysql.connector
 
 from typing import Any
-from pydantic import BaseModel
-
-
-class AgeCategory(BaseModel):
-    id: int
-    name: str
-    minage: int
-    maxage: int
-
-
-class SkiCategory(BaseModel):
-    id: int
-    name: str
-
-
-class PriceEntry(BaseModel):
-    skiid: int
-    agecatid: int
-    price: int
-
+from data_classes import AgeCategory, PriceEntry, SkiCategory
 
 #TODO Should probably use fault handling with exceptions here
 class DatabaseClient:

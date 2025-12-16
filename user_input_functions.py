@@ -1,4 +1,4 @@
-from db_client import AgeCategory, SkiCategory
+from data_classes import AgeCategory, SkiCategory
 from front_end_functions import print_age_categories, print_ski_categories
 
 

@@ -1,4 +1,4 @@
-from db_client import AgeCategory, DatabaseClient, PriceEntry, SkiCategory
+from data_classes import AgeCategory, PriceEntry, SkiCategory
 
 
 def print_menu() -> None:
@@ -33,17 +33,6 @@ def list_prices(
                 print("-"*len(row))
                 print(row)
         print("\n")
-
-
-def list_latest_prices() -> None:
-    # Fetch latest data
-    db_client = DatabaseClient()
-    prices = db_client.fetch_price_list()
-    age_categories = db_client.fetch_age_categories()
-    ski_categories = db_client.fetch_ski_categories()
-    db_client.close()
-
-    list_prices(prices, age_categories, ski_categories)
 
 
 def print_age_categories(age_categories: dict[int, AgeCategory]) -> None:

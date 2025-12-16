@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from booking import Booking, print_booking, start_booking
-from front_end_functions import list_latest_prices, print_menu
+from booking import Booking, list_latest_prices, print_booking, start_booking
+from front_end_functions import print_menu
 
 
 #Should use try except for fault handling here instead of Nones

@@ -1,6 +1,7 @@
 from front_end_functions import list_prices
 from pydantic import BaseModel
-from db_client import AgeCategory, DatabaseClient, PriceEntry, SkiCategory
+from db_client import DatabaseClient
+from data_classes import AgeCategory, PriceEntry, SkiCategory
 from user_input_functions import ask_for_age, ask_for_amount_of_travelers, ask_for_ski_category
 
 class TravelerBooking(BaseModel):
@@ -12,6 +13,17 @@ class TravelerBooking(BaseModel):
 class Booking(BaseModel):
     traveler_bookings: list[TravelerBooking]
     total_price: int
+
+
+def list_latest_prices() -> None:
+    # Fetch latest data
+    db_client = DatabaseClient()
+    prices = db_client.fetch_price_list()
+    age_categories = db_client.fetch_age_categories()
+    ski_categories = db_client.fetch_ski_categories()
+    db_client.close()
+
+    list_prices(prices, age_categories, ski_categories)
 
 
 #TODO Could probably do a better fault handling using exceptions here and not None returns
