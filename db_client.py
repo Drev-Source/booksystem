@@ -1,5 +1,6 @@
-from typing import Any
 import mysql.connector
+
+from typing import Any
 from pydantic import BaseModel
 
 
@@ -21,6 +22,7 @@ class PriceEntry(BaseModel):
     price: int
 
 
+#TODO Should probably use fault handling with exceptions here
 class DatabaseClient:
     def __init__(self, host: str = "localhost", user: str = "test", password: str = "tester", database: str = "ski_db") -> None:
         self.connection = mysql.connector.connect(
@@ -72,18 +74,18 @@ class DatabaseClient:
             "AND maxage IS NOT NULL;"
             )
 
-        ageCategories: dict[int, AgeCategory] = {}
+        age_categories: dict[int, AgeCategory] = {}
         for entry in stored_age_categories:
             if not len(entry) == 4:
                 print(f"Missing fields in entry {entry}, skipping")
                 continue
 
             if isinstance(entry[0], int) and isinstance(entry[2], int) and isinstance(entry[3], int):
-                ageCategories[int(entry[0])] = AgeCategory(id=int(entry[0]), name=entry[1], minage=int(entry[2]), maxage=int(entry[3]))
+                age_categories[int(entry[0])] = AgeCategory(id=int(entry[0]), name=entry[1], minage=int(entry[2]), maxage=int(entry[3]))
             else:
                 print(f"Invalid type in entry {entry}, skipping")
 
-        return ageCategories
+        return age_categories
 
 
     def fetch_ski_categories(self) -> dict[int, SkiCategory]:
@@ -93,14 +95,14 @@ class DatabaseClient:
             "AND name IS NOT NULL;"
             )
 
-        skiCategories: dict[int, SkiCategory] = {}
+        ski_categories: dict[int, SkiCategory] = {}
         for entry in stored_ski_categories:
             if not len(entry) == 2:
                 print(f"Missing fields in entry {entry}, skipping")
                 continue
 
             if isinstance(entry[0], int):
-                skiCategories[int(entry[0])] = SkiCategory(id=entry[0], name=entry[1])
+                ski_categories[int(entry[0])] = SkiCategory(id=entry[0], name=entry[1])
             else:
                 print(f"Invalid type in entry {entry}, skipping")
-        return skiCategories
+        return ski_categories
