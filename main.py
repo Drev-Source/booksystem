@@ -10,13 +10,12 @@ def print_menu():
     print("\"0\" exit\n")
 
 
-def print_price_list(
+def list_prices(
         prices: list[PriceEntry],
         ageCategories: dict[int, AgeCategory],
         skiCategories: dict[int, SkiCategory],
     ):
-    print("Price List:")
-    print("\n\n")
+    print("\nPrice List:\n")
 
     column_ids = skiCategories.keys()
 
@@ -35,15 +34,7 @@ def print_price_list(
                 row += f"|   Pris: {sorted_entry.price} SEK"
                 print("-"*len(row))
                 print(row)
-
-        print("\n\n")
-
-
-def print_age_categories(ageCategories: dict[int, AgeCategory]):
-    print("Age Categories:")
-    for agecatid, agecat in ageCategories.items():
-        print(f"{agecatid}: {agecat.name} ({agecat.minage}-{agecat.maxage})")
-    print("\n")
+        print("\n")
 
 
 def wait_for_user_input(prompt: str) -> str:
@@ -59,7 +50,7 @@ def wait_for_user_input(prompt: str) -> str:
         if not line:
             continue
         elif line.lower() in ('exit', 'quit'):
-            print('Exiting booking menu.')
+            print("Cancelling")
             return None
 
         return line
@@ -79,6 +70,13 @@ def ask_for_amount_of_travelers() -> int | None:
         return ask_for_amount_of_travelers()
 
 
+def print_age_categories(ageCategories: dict[int, AgeCategory]):
+    print("Age Categories:")
+    for agecatid, agecat in ageCategories.items():
+        print(f"{agecatid}: {agecat.name} ({agecat.minage}-{agecat.maxage})")
+    print("\n")
+
+
 def ask_for_age_category(ageCategories: dict[int, AgeCategory]) -> int | None:
     print_age_categories(ageCategories)
     prompt = "Please enter the age category ID from the list above:"
@@ -93,26 +91,59 @@ def ask_for_age_category(ageCategories: dict[int, AgeCategory]) -> int | None:
         return ask_for_age_category(ageCategories)
 
 
-def print_booking_menu(
+def print_ski_categories(skiCategories: dict[int, SkiCategory]):
+    print("Ski Categories:")
+    for skicatid, skicat in skiCategories.items():
+        print(f"{skicatid}: {skicat.name}")
+    print("\n")
+
+
+def ask_for_ski_category(skiCategories: dict[int, SkiCategory]) -> int | None:
+    print_ski_categories(skiCategories)
+    prompt = "Please enter the ski category ID from the list above:"
+    line = wait_for_user_input(prompt)
+
+    if line is None:
+        return None
+    elif line.isdigit() and int(line) > 0:
+        return int(line)
+    else:
+        print(f"Invalid input: {line}, please enter a listed number")
+        return ask_for_ski_category(skiCategories)
+
+
+def create_booking(
         prices: list[PriceEntry],
         ageCategories: dict[int, AgeCategory],
         skiCategories: dict[int, SkiCategory],
     ) -> None:
     travelers = ask_for_amount_of_travelers()
+    total_price = 0
+    if not travelers:
+        return
 
     for traveler in range(1, travelers+1):
         print(f"Traveler {traveler}/{travelers}:")
         age_category = ask_for_age_category(ageCategories)
         if not age_category:
             return
+
         print(f"Traveler {traveler} is {ageCategories[age_category].name}\n")
+        list_prices(prices, ageCategories, skiCategories)
+        ski_category = ask_for_ski_category(skiCategories)
+        if not ski_category:
+            return
 
-    # save traveler info
-    # list the ski categories
-    # please enter ski category
+        print(f"Selected {skiCategories[ski_category].name} for traveler {traveler}\n")
 
-    # show total price
-    print("mumma vilken smaskig bokning")
+        traveler_price = [price for price in prices if price.agecatid == age_category and price.skiid == ski_category]
+        if traveler_price:
+            print(f"Price for this combination is {traveler_price[0].price} SEK.\n")
+            total_price += traveler_price[0].price
+        else:
+            print(f"No price found for this combination {ageCategories[age_category].name} and {skiCategories[ski_category].name}.")
+
+    print(f"Total price: {total_price} SEK\n")
 
 
 def main():
@@ -141,9 +172,9 @@ def main():
             print('Bye.')
             break
         elif cmd == '1':
-            print_price_list(prices, ageCategories, skiCategories)
+            list_prices(prices, ageCategories, skiCategories)
         elif cmd == '2':
-            print_booking_menu(prices, ageCategories, skiCategories)
+            create_booking(prices, ageCategories, skiCategories)
         else:
             print(f"Unknown command: {cmd}.")
 
