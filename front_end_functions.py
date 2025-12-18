@@ -47,3 +47,8 @@ def print_ski_categories(ski_categories: dict[int, SkiCategory]) -> None:
     for ski_category_id, ski_category in ski_categories.items():
         print(f"{ski_category_id}: {ski_category.name}")
     print("\n")
+
+
+def print_yr_licenses() -> None:
+    print("\nWeather data provided by YR.no under the Creative Commons Attribution 4.0 International (CC BY 4.0) license.")
+    print("See https://creativecommons.org/licenses/by/4.0/ for more information.\n")
