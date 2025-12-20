@@ -145,6 +145,3 @@ class YRClient:
 
     def hash_data(self, content: str):
         return hashlib.sha256(content.encode()).hexdigest()
-
-c = YRClient()
-s = c.get_weather()
