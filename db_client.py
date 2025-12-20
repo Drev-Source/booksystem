@@ -1,7 +1,26 @@
 import mysql.connector
 
+from pydantic import BaseModel
 from typing import Any
-from data_classes import AgeCategory, PriceEntry, SkiCategory
+
+
+class AgeCategory(BaseModel):
+    id: int
+    name: str
+    minage: int
+    maxage: int
+
+
+class SkiCategory(BaseModel):
+    id: int
+    name: str
+
+
+class PriceEntry(BaseModel):
+    skiid: int
+    agecatid: int
+    price: int
+
 
 #TODO Should probably use fault handling with exceptions here
 class DatabaseClient:
@@ -41,12 +60,12 @@ class DatabaseClient:
             if not all(isinstance(i, int) for i in entry):
                 print(f"Invalid type in entry {entry}, skipping")
                 continue
-            
+
             prices.append(PriceEntry(skiid=int(entry[0]), agecatid=int(entry[1]), price=int(entry[2])))
+
         return prices
 
     def fetch_age_categories(self) -> dict[int, AgeCategory]:
-        
         stored_age_categories = self.execute_query(
             "SELECT id, name, minage, maxage FROM age_category " \
             "WHERE id IS NOT NULL " \
@@ -86,4 +105,5 @@ class DatabaseClient:
                 ski_categories[int(entry[0])] = SkiCategory(id=entry[0], name=entry[1])
             else:
                 print(f"Invalid type in entry {entry}, skipping")
+
         return ski_categories

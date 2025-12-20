@@ -1,4 +1,4 @@
-from data_classes import AgeCategory, SkiCategory
+from db_client import AgeCategory, SkiCategory
 from front_end_functions import print_age_categories, print_ski_categories
 
 
@@ -8,6 +8,7 @@ def get_age_category_id(age: int, age_categories: dict[int, AgeCategory]) -> int
     for age_category_id, age_category in age_categories.items():
         if age_category.minage <= age <= age_category.maxage:
             return age_category_id
+
     print("No age category found for this age. Self destructing booking process.\n")
     return None
 
