@@ -1,4 +1,5 @@
-from data_classes import AgeCategory, PriceEntry, SkiCategory
+from db_client import AgeCategory, PriceEntry, SkiCategory
+from yr_client import YRWeatherData
 
 
 def print_menu() -> None:
@@ -52,3 +53,15 @@ def print_ski_categories(ski_categories: dict[int, SkiCategory]) -> None:
 def print_yr_licenses() -> None:
     print("\nWeather data provided by YR.no under the Creative Commons Attribution 4.0 International (CC BY 4.0) license.")
     print("See https://creativecommons.org/licenses/by/4.0/ for more information.\n")
+
+
+#TODO Add units for weather data
+def print_weather_data(current_weather: YRWeatherData) -> None:
+    print(f"Weather is:")
+    print(f"Air pressure: {current_weather.air_pressure_at_sea_level}")
+    print(f"Air temperature: {current_weather.air_temperature}")
+    print(f"Cloud area fraction: {current_weather.cloud_area_fraction}")
+    print(f"Relative humidity: {current_weather.relative_humidity}")
+    print(f"Wind direction: {current_weather.wind_from_direction}")
+    print(f"Wind speed: {current_weather.wind_speed}")
+    print_yr_licenses()

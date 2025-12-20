@@ -42,10 +42,15 @@ class YRData(BaseModel):
     timeseries_data: list[YRTimeWeatherData]
 
 
+def get_current_timzeone_time(timezone: str) -> None:
+    #TODO Implement this
+    raise NotImplementedError("Function is not implemented")
+
+
 class YRClient:
-    
-    def get_weather(self, alt: int = 0, lat: float = 56.6759, lon: float = 12.8582) -> dict:
-        filename = self.hash_data(str(alt)+str(lat)+str(lon)) + ".json"
+
+    def get_weather(self, alt: int = 0, lat: float = 56.6759, lon: float = 12.8582) -> YRData:
+        filename = self.hash_content(str(alt)+str(lat)+str(lon)) + ".json"
         yr_cache = self.check_cache_isvalid(filename)
 
         #TODO Incorporate proper check for the expiration
@@ -68,8 +73,25 @@ class YRClient:
         if response.status_code == 200:
             yr_data = self.get_yr_data(response.headers, response.json())
             self.save_cache(filename, yr_data)
+            return yr_data
+        elif response.status_code == 304:
+            return yr_cache
+        
+        raise Exception(f"Unknown error fetching data, repsonse {response}")
 
-        return yr_data
+
+    def get_current_weather(self) -> YRWeatherData | None:
+        yr_data = self.get_weather()
+        if not yr_data or not yr_data.timeseries_data:
+            return None
+        
+        #TODO return the acutal current weather data based on current time
+        #current_gmt_time = get_current_timzeone_time("gmt")
+        #for data in yr_data.timeseries_data:
+        #    if data.time.hour == current_gmt_time.hour:
+        #       return data
+        
+        return yr_data.timeseries_data[0].data
 
 
     def get_units_data(self, data: Any) -> YRUnitMetadata:
@@ -88,7 +110,7 @@ class YRClient:
 
         timeseries_data = [
                     YRTimeWeatherData(
-                        time=t.get("time", ""), 
+                        time=t.get("time", ""),
                         data=YRWeatherData.model_validate(t.get("data", {}).get("instant", {}).get("details", {}))
                     )
                     for t in timeseries
@@ -119,18 +141,24 @@ class YRClient:
     def check_cache_isvalid(self, filename: str) -> YRData | None:
         data = self.load_cache(filename)
 
-        #TODO proper check for expiration
-        if data:
-            print("Current cache is valid, using cache.")
-            return data
-        else:
-            print("No cache exists!")
-            return None
+        if not data:
+           print("There is no weather data cache")
+           return None
+
+        #TODO implement this
+        #if data.expiration < get_current_timzeone_time("gmt"):
+        #   print("Weather data cache expired")
+        #   return None
+        #else:
+        #   print("Valid weather data cache exists")
+        #   return data
+
+        return data
 
 
     def save_cache(self, filename: str, yr_data: YRData) -> None:
         if not self.check_cache_isvalid(filename):
-            print("Caching YR data")
+            print("Caching weather data")
             with open(filename, "w") as f:
                 f.write(yr_data.model_dump_json())
 
@@ -143,5 +171,5 @@ class YRClient:
            return YRData.model_validate(json.load(f))
 
 
-    def hash_data(self, content: str):
+    def hash_content(self, content: str):
         return hashlib.sha256(content.encode()).hexdigest()
