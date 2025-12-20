@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import hashlib
 import json
 import os
@@ -8,7 +8,6 @@ from pydantic import BaseModel
 from typing import Any
 
 
-Datetime = datetime.datetime
 Response = requests.Response
 BASE_URL = "https://api.met.no/weatherapi/locationforecast/2.0/compact"
 
@@ -38,6 +37,7 @@ class YRTimeWeatherData(BaseModel):
 
 class YRData(BaseModel):
     last_modified: str
+    expires: datetime
     units: YRUnitMetadata
     timeseries_data: list[YRTimeWeatherData]
 
@@ -48,13 +48,14 @@ class YRClient:
         filename = self.hash_data(str(alt)+str(lat)+str(lon)) + ".json"
         yr_cache = self.check_cache_isvalid(filename)
 
-        #TODO Make proper use of last-modified in cache when requesting for new data
-        if yr_cache:
-            return yr_cache
+        #TODO Incorporate proper check for the expiration
+        #if yr_cache:
+        #    return yr_cache
 
+        last_modified = yr_cache.last_modified if yr_cache.last_modified else ""
         headers = {
-            "User-Agent": "booksystem/0.1 github.com/Drev-Source/booksystem"
-            #"If-Modified-Since": yr_cache.last_modified
+            "User-Agent": "booksystem/0.1 github.com/Drev-Source/booksystem",
+            "If-Modified-Since": last_modified
         }
         params = {
             "altitude": alt,
@@ -75,7 +76,7 @@ class YRClient:
         units = data.get("properties", {}).get("meta", {}).get("units", {})
 
         if not units:
-            raise ValueError("Invalid data, couldn't get unit metadata from response.")
+            raise ValueError("Invalid data, couldn't get unit metadata from data.")
         
         return YRUnitMetadata.model_validate(units)
     
@@ -94,21 +95,31 @@ class YRClient:
                 ]
 
         if not timeseries_data:
-            raise ValueError("Invalid data, couldn't get timeseries data from response.")
+            raise ValueError("Invalid data, couldn't get timeseries data from data.")
         
         return timeseries_data
 
 
-    def get_yr_data(self, headers: Any, data: Any) -> YRData:
+    def get_expire_date(self, headers: dict[Any]) -> datetime:
+        date_format = "%a, %d %b %Y %H:%M:%S %Z"
+        date = headers.get("Expires", "")
+
+        return datetime.strptime(date, date_format)
+
+
+    def get_yr_data(self, headers: dict[Any], data: dict[Any]) -> YRData:
         units = self.get_units_data(data)
         timeseries_data = self.get_timeseries_data(data)
-        return YRData(last_modified=headers.get("Last-Modified", ""), units=units, timeseries_data=timeseries_data)
+        last_modified = headers.get("Last-Modified", "")
+        expires = self.get_expire_date(headers)
+
+        return YRData(last_modified=last_modified, expires=expires, units=units, timeseries_data=timeseries_data)
 
 
     def check_cache_isvalid(self, filename: str) -> YRData | None:
         data = self.load_cache(filename)
 
-        #TODO proper check for last modified
+        #TODO proper check for expiration
         if data:
             print("Current cache is valid, using cache.")
             return data
@@ -136,4 +147,4 @@ class YRClient:
         return hashlib.sha256(content.encode()).hexdigest()
 
 c = YRClient()
-c.get_weather()
+s = c.get_weather()
