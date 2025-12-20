@@ -1,5 +1,5 @@
 from db_client import AgeCategory, DatabaseClient, PriceEntry, SkiCategory
-from exceptions import AbortException
+from exceptions import AbortBookingException, AbortException
 from front_end_functions import list_prices, print_age_categories, print_ski_categories
 from pydantic import BaseModel
 from user_input_functions import ask_for_age, ask_for_amount_of_travelers, ask_for_ski_category
@@ -154,8 +154,7 @@ def create_booking(
     return Booking(traveler_bookings=traveler_bookings, total_price=total_price)
 
 
-#TODO Could probably do a better fault handling using exceptions here and not None returns
-def start_booking() -> Booking | None:
+def start_booking() -> Booking:
     # Fetch latest data
     db_client = DatabaseClient()
     prices = db_client.fetch_price_list()
@@ -169,11 +168,9 @@ def start_booking() -> Booking | None:
         travelers = ask_for_amount_of_travelers()
         booking = create_booking(travelers, prices, age_categories, ski_categories)
     except AbortException as e:
-        print(repr(e))
-        return None
+        raise AbortBookingException("Cancel booking")
     except ValueError as e:
-        print(repr(e))
-        return None
+        raise e
 
     return booking
 
