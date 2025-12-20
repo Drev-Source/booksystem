@@ -16,6 +16,8 @@ Add posibility to create customer account
 
 Fix better ask_for_age, age category handle perhaps choose closest range?
 
+Fix prettier exception print
+
 Implement get_current_timzeone_time in YRClient
 Add proper expire check in check_cache_isvalid in YRClient 
 Fetch the actual current weather based on current time
