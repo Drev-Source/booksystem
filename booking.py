@@ -1,9 +1,9 @@
+from db_client import AgeCategory, DatabaseClient, PriceEntry, SkiCategory
 from front_end_functions import list_prices, print_weather_data
 from pydantic import BaseModel
-from db_client import DatabaseClient
-from data_classes import AgeCategory, PriceEntry, SkiCategory
 from user_input_functions import ask_for_age, ask_for_amount_of_travelers, ask_for_ski_category
 from yr_client import YRClient, YRWeatherData
+
 
 class TravelerBooking(BaseModel):
     age_category: AgeCategory
