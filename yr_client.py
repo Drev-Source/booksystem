@@ -52,7 +52,7 @@ class YRClient:
         #if yr_cache:
         #    return yr_cache
 
-        last_modified = yr_cache.last_modified if yr_cache.last_modified else ""
+        last_modified = yr_cache.last_modified if yr_cache else ""
         headers = {
             "User-Agent": "booksystem/0.1 github.com/Drev-Source/booksystem",
             "If-Modified-Since": last_modified
