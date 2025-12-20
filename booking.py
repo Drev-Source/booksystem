@@ -1,5 +1,6 @@
 from db_client import AgeCategory, DatabaseClient, PriceEntry, SkiCategory
-from front_end_functions import list_prices, print_weather_data
+from exceptions import AbortException
+from front_end_functions import list_prices, print_age_categories, print_ski_categories
 from pydantic import BaseModel
 from user_input_functions import ask_for_age, ask_for_amount_of_travelers, ask_for_ski_category
 from yr_client import YRClient, YRWeatherData
@@ -28,18 +29,20 @@ def list_latest_prices() -> None:
     list_prices(prices, age_categories, ski_categories)
 
 
-def find_lowest_and_highest_age_group(age_categories: dict[int, AgeCategory]) -> tuple[AgeCategory, AgeCategory]:
+def find_lowest_and_highest_age_group(age_categories: dict[int, AgeCategory]) -> tuple[AgeCategory]:
     if not age_categories:
         raise ValueError("Age categories can't be empty")
 
-    lowest = list(age_categories.values())[0] # Prioritize lowest min age and then lowest max age
-    highest = list(age_categories.values())[0] # Prioritize highest max age and then highest low age
+    lowest = list(age_categories.values())[0]
+    highest = list(age_categories.values())[0]
 
     for age_category in age_categories.values():
+        # Prioritize lowest min age and then lowest max age
         if lowest.minage >= age_category.minage:
             if lowest.maxage > age_category.minage:
                 lowest = age_category
 
+        # Prioritize highest max age and then highest low age
         if highest.maxage <= age_category.maxage:
             if highest.minage < age_category.minage:
                 highest = age_category
@@ -71,7 +74,6 @@ def get_price_reduction(age_category_id: int, age_categories: dict[int, AgeCateg
     if not current_weather:
         return 1
 
-    print_weather_data(current_weather)
     youngest_group, oldest_group = find_lowest_and_highest_age_group(age_categories)
 
     if age_category_id == youngest_group.id:
@@ -113,7 +115,6 @@ def calculate_booking_price(
     return total_price
 
 
-#TODO Could probably do a better fault handling using exceptions here and not None returns
 def create_booking(
     travelers: int,
     prices: list[PriceEntry],
@@ -123,17 +124,14 @@ def create_booking(
     traveler_bookings: list[TravelerBooking] = []
     for traveler in range(1, travelers+1):
         print(f"Traveler {traveler}/{travelers}:")
-
+        print_age_categories(age_categories)
         age_category_id = ask_for_age(age_categories)
-        if not age_category_id:
-            return
 
         subset_age_categories = {k: age_categories[k] for k in age_categories if k == age_category_id}
         list_prices(prices, subset_age_categories, ski_categories)
 
+        print_ski_categories(ski_categories)
         ski_category_id = ask_for_ski_category(ski_categories)
-        if not ski_category_id:
-            return
 
         try:
             price, price_reduced = calculate_traveler_price(prices, age_category_id, ski_category_id, age_categories)
@@ -167,11 +165,17 @@ def start_booking() -> Booking | None:
 
     list_prices(prices, age_categories, ski_categories)
 
-    travelers = ask_for_amount_of_travelers()
-    if not travelers:
+    try:
+        travelers = ask_for_amount_of_travelers()
+        booking = create_booking(travelers, prices, age_categories, ski_categories)
+    except AbortException as e:
+        print(repr(e))
+        return None
+    except ValueError as e:
+        print(repr(e))
         return None
 
-    return create_booking(travelers, prices, age_categories, ski_categories)
+    return booking
 
 
 def print_booking(booking: Booking) -> None:
