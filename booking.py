@@ -141,6 +141,7 @@ def create_booking(
             print(repr(e))
             print("Using default price 0")
             price = 0
+            price_reduced = 0
 
         traveler_bookings.append(
             TravelerBooking(
