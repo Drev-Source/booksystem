@@ -1,0 +1,16 @@
+Add proper fault handle, try excepts
+Add custom exceptions
+
+Add units for weather print
+Add weather print to menu
+Remove weather print in price calculation
+
+Fix better ask_for_age, age category handle
+
+Implement get_current_timzeone_time in YRClient
+Add proper expire check in check_cache_isvalid in YRClient 
+Fetch the actual current weather based on current time
+
+Commentary on hard read code
+
+Restructure file structure?
