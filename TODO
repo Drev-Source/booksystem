@@ -1,9 +1,8 @@
-Add proper fault handle, try excepts
-Add custom exceptions
+Add proper fault handle db_client
+Add if needed custom db_client exceptions
 
 Add units for weather print
 Add weather print to menu
-Remove weather print in price calculation
 
 Fix better ask_for_age, age category handle
 
