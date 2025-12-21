@@ -6,6 +6,10 @@ Add proper expire check in check_cache_isvalid in YRClient
 Fetch the actual current weather based on current time
 Add timezone conversions on time
 
+Add unit tests
+
+Setup check for pull requests
+
 Add posibility to choose custom destination
 Add default destinations
 Add posibility to choose destination for weather print
