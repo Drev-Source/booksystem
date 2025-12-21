@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 from booking import (
     Booking,
-    get_oldest_weather_price_reduction,
-    get_youngest_weather_price_reduction,
-    list_latest_prices,
     print_booking,
     start_booking
-    )
-from exceptions import AbortBookingException
-from front_end_functions import print_menu, print_weather_data
-from yr_client import YRClient
+)
+from utility.exceptions import AbortBookingException
+from front_end import (
+    print_menu,
+    print_weather_data,
+    list_latest_prices
+)
+from clients.yr_client import YRClient
 
 
 def main() -> None:
@@ -38,9 +39,7 @@ def main() -> None:
         elif cmd == "2": # Show weather
             yr_client = YRClient()
             weather = yr_client.get_current_weather()
-            reduction_young = get_youngest_weather_price_reduction(weather.data)
-            reduction_old = get_oldest_weather_price_reduction(weather.data)
-            print_weather_data(weather, reduction_young, reduction_old)
+            print_weather_data(weather)
 
         elif cmd == "3": # Create booking
             try:

@@ -1,5 +1,6 @@
-from db_client import AgeCategory, PriceEntry, SkiCategory
-from yr_client import YRWeatherInfo
+from clients.db_client import AgeCategory, DatabaseClient, PriceEntry, SkiCategory
+from clients.yr_client import YRWeatherInfo
+from utility.economy import get_old_price_reduction, get_young_price_reduction
 
 
 def print_divider() -> None:
@@ -43,6 +44,17 @@ def list_prices(
         print("\n")
 
 
+def list_latest_prices() -> None:
+    # Fetch latest data
+    db_client = DatabaseClient()
+    prices = db_client.fetch_price_list()
+    age_categories = db_client.fetch_age_categories()
+    ski_categories = db_client.fetch_ski_categories()
+    db_client.close()
+
+    list_prices(prices, age_categories, ski_categories)
+
+
 def print_age_categories(age_categories: dict[int, AgeCategory]) -> None:
     print_divider()
     print("Age Categories:")
@@ -64,20 +76,19 @@ def print_yr_licenses() -> None:
     print("See https://creativecommons.org/licenses/by/4.0/ for more information.\n")
 
 
-def print_weather_data(
-    current_weather: YRWeatherInfo,
-    reduction_young: float,
-    reduction_old: float
-) -> None:
+def print_weather_data(weather: YRWeatherInfo) -> None:
     print_divider()
     print(f"Weather is:")
-    print(f"Air pressure: {current_weather.data.air_pressure_at_sea_level} {current_weather.units.air_pressure_at_sea_level}")
-    print(f"Air temperature: {current_weather.data.air_temperature} {current_weather.units.air_temperature}")
-    print(f"Cloud area fraction: {current_weather.data.cloud_area_fraction} {current_weather.units.cloud_area_fraction}")
-    print(f"Relative humidity: {current_weather.data.relative_humidity} {current_weather.units.relative_humidity}")
-    print(f"Wind direction: {current_weather.data.wind_from_direction} {current_weather.units.wind_from_direction}")
-    print(f"Wind speed: {current_weather.data.wind_speed} {current_weather.units.wind_speed}")
+    print(f"Air pressure: {weather.data.air_pressure_at_sea_level} {weather.units.air_pressure_at_sea_level}")
+    print(f"Air temperature: {weather.data.air_temperature} {weather.units.air_temperature}")
+    print(f"Cloud area fraction: {weather.data.cloud_area_fraction} {weather.units.cloud_area_fraction}")
+    print(f"Relative humidity: {weather.data.relative_humidity} {weather.units.relative_humidity}")
+    print(f"Wind direction: {weather.data.wind_from_direction} {weather.units.wind_from_direction}")
+    print(f"Wind speed: {weather.data.wind_speed} {weather.units.wind_speed}")
     print_yr_licenses()
+
+    reduction_young = get_young_price_reduction(weather.data.air_temperature)
+    reduction_old = get_old_price_reduction(weather.data.air_temperature)
 
     if reduction_young < 1:
         print(f"Youngest age group price reduction: {(1-reduction_young)*100}%")
