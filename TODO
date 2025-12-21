@@ -1,8 +1,7 @@
+Fix entering invalid ski cat id crash the program
+
 Add proper fault handle db_client
 Add if needed custom db_client exceptions
-
-Add units for weather print
-Add weather print to menu
 
 Fix better ask_for_age, age category handle perhaps choose closest range?
 
@@ -15,6 +14,7 @@ Fix prettier exception print
 
 Add posibility to choose custom destination
 Add default destinations
+Add posibility to choose destination for weather print
 
 Add posibility to long term save booking
 Add posibility to save several bookings
