@@ -69,6 +69,7 @@ class YRClient:
         #for data in yr_data.timeseries_data:
         #    if data.time.hour == current_gmt_time.hour:
         #       return data
+
         data = yr_data.timeseries_data[0].data
         units = yr_data.units
         return YRWeatherInfo(data=data, units=units)
