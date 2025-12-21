@@ -4,7 +4,7 @@ from front_end import list_prices, print_age_categories, print_divider, print_sk
 from pydantic import BaseModel
 from utility.economy import get_price_reduction
 from utility.exceptions import AbortBookingException, AbortException
-from utility.user_input import ask_for_age, ask_for_amount_of_travelers, ask_for_ski_category
+from user_input import ask_for_age, ask_for_amount_of_travelers, ask_for_ski_category
 
 
 
