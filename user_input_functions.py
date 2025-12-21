@@ -3,12 +3,13 @@ from exceptions import AbortException, RetryException
 
 
 def get_age_category_id(age: int, age_categories: dict[int, AgeCategory]) -> int | None:
-    #TODO What if the age fits multiple categories?
-    #TODO What if the age fits no category?
     for age_category_id, age_category in age_categories.items():
         if age_category.minage <= age <= age_category.maxage:
             return age_category_id
 
+    # What if the age fits multiple categories?
+    # What if the age fits no category?
+    # Should we try to choose closest category?
     raise RetryException(f"Invalid input: {age}, please enter age within listed ranges")
 
 
@@ -66,6 +67,9 @@ def ask_for_ski_category(ski_categories: dict[int, SkiCategory]) -> int:
 
     try:
         if line.isdigit() and int(line) > 0:
+            if int(line) not in ski_categories.keys():
+                raise RetryException(f"Invalid input: {line}, please enter a listed number")
+            
             return int(line)
         else:
             raise RetryException(f"Invalid input: {line}, please enter a listed number")
