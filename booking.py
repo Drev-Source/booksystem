@@ -77,9 +77,9 @@ def get_price_reduction(age_category_id: int, age_categories: dict[int, AgeCateg
     youngest_group, oldest_group = find_lowest_and_highest_age_group(age_categories)
 
     if age_category_id == youngest_group.id:
-        return get_youngest_weather_price_reduction(current_weather)
+        return get_youngest_weather_price_reduction(current_weather.data)
     elif age_category_id == oldest_group.id:
-        return get_oldest_weather_price_reduction(current_weather)
+        return get_oldest_weather_price_reduction(current_weather.data)
     else:
         return 1
 

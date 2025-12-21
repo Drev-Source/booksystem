@@ -30,6 +30,11 @@ class YRWeatherData(BaseModel):
     wind_speed: float
 
 
+class YRWeatherInfo(BaseModel):
+    data: YRWeatherData
+    units: YRUnitMetadata
+
+
 class YRTimeWeatherData(BaseModel):
     time: str
     data: YRWeatherData
@@ -54,7 +59,7 @@ def hash_content(content: str):
 class YRClient:
 
     #TODO allow destinations
-    def get_current_weather(self) -> YRWeatherData | None:
+    def get_current_weather(self) -> YRWeatherInfo | None:
         yr_data = self.request_weather()
         if not yr_data or not yr_data.timeseries_data:
             return None
@@ -64,8 +69,9 @@ class YRClient:
         #for data in yr_data.timeseries_data:
         #    if data.time.hour == current_gmt_time.hour:
         #       return data
-        
-        return yr_data.timeseries_data[0].data
+        data = yr_data.timeseries_data[0].data
+        units = yr_data.units
+        return YRWeatherInfo(data=data, units=units)
 
 
     def request_weather(self, alt: int = 0, lat: float = 56.6759, lon: float = 12.8582) -> YRData:
