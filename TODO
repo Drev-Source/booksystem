@@ -1,5 +1,3 @@
-Commentary on hard read code
-
 Add proper fault handle db_client
 Add if needed custom db_client exceptions
 
