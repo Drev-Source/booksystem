@@ -1,16 +1,6 @@
-from db_client import AgeCategory, SkiCategory
-from exceptions import AbortException, RetryException
-
-
-def get_age_category_id(age: int, age_categories: dict[int, AgeCategory]) -> int | None:
-    for age_category_id, age_category in age_categories.items():
-        if age_category.minage <= age <= age_category.maxage:
-            return age_category_id
-
-    # What if the age fits multiple categories?
-    # What if the age fits no category?
-    # Should we try to choose closest category?
-    raise RetryException(f"Invalid input: {age}, please enter age within listed ranges")
+from clients.db_client import AgeCategory, SkiCategory
+from utility.exceptions import AbortException, RetryException
+from utility.utility import get_age_category_id
 
 
 def wait_for_user_input(prompt: str) -> str:
@@ -53,6 +43,8 @@ def ask_for_age(age_categories: dict[int, AgeCategory]) -> int:
     try:
         if line.isdigit() and int(line) >= 0:
             age_category = get_age_category_id(int(line), age_categories)
+            if not age_category:
+                raise RetryException(f"Invalid input: {int(line)}, please enter age within listed ranges")
             return age_category
         else:
             raise RetryException(f"Invalid input: {line}, please enter age within listed ranges")

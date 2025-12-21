@@ -1,9 +1,11 @@
-from db_client import AgeCategory, DatabaseClient, PriceEntry, SkiCategory
-from exceptions import AbortBookingException, AbortException
-from front_end_functions import list_prices, print_age_categories, print_divider, print_ski_categories
+from clients.db_client import AgeCategory, DatabaseClient, PriceEntry, SkiCategory
+from clients.yr_client import YRClient
+from front_end import list_prices, print_age_categories, print_divider, print_ski_categories
 from pydantic import BaseModel
-from user_input_functions import ask_for_age, ask_for_amount_of_travelers, ask_for_ski_category
-from yr_client import YRClient, YRWeatherData
+from utility.economy import get_price_reduction
+from utility.exceptions import AbortBookingException, AbortException
+from utility.user_input import ask_for_age, ask_for_amount_of_travelers, ask_for_ski_category
+
 
 
 class TravelerBooking(BaseModel):
@@ -18,82 +20,28 @@ class Booking(BaseModel):
     total_price: int
 
 
-def list_latest_prices() -> None:
-    # Fetch latest data
-    db_client = DatabaseClient()
-    prices = db_client.fetch_price_list()
-    age_categories = db_client.fetch_age_categories()
-    ski_categories = db_client.fetch_ski_categories()
-    db_client.close()
-
-    list_prices(prices, age_categories, ski_categories)
-
-
-def find_lowest_and_highest_age_group(age_categories: dict[int, AgeCategory]) -> tuple[AgeCategory]:
-    if not age_categories:
-        raise ValueError("Age categories can't be empty")
-
-    lowest = list(age_categories.values())[0]
-    highest = list(age_categories.values())[0]
-
-    for age_category in age_categories.values():
-        # Prioritize lowest min age and then lowest max age
-        if lowest.minage >= age_category.minage:
-            if lowest.maxage > age_category.minage:
-                lowest = age_category
-
-        # Prioritize highest max age and then highest low age
-        if highest.maxage <= age_category.maxage:
-            if highest.minage < age_category.minage:
-                highest = age_category
-
-    return lowest, highest
-
-
-def get_youngest_weather_price_reduction(current_weather: YRWeatherData) -> float:
-    if current_weather.air_temperature < 14:
-        return 0
-    else:
-        return 1
-
-
-def get_oldest_weather_price_reduction(current_weather: YRWeatherData) -> float:
-    if current_weather.air_temperature >= 18:
-        return 0.6
-    else:
-        return 1
-
-
-def get_price_reduction(age_category_id: int, age_categories: dict[int, AgeCategory]) -> float:
-    if not age_categories:
-        return 1
-
-    yr_client = YRClient()
-    current_weather = yr_client.get_current_weather()
-
-    if not current_weather:
-        return 1
-
-    youngest_group, oldest_group = find_lowest_and_highest_age_group(age_categories)
-
-    if age_category_id == youngest_group.id:
-        return get_youngest_weather_price_reduction(current_weather.data)
-    elif age_category_id == oldest_group.id:
-        return get_oldest_weather_price_reduction(current_weather.data)
-    else:
-        return 1
-
-
 def calculate_traveler_price(
     prices: list[PriceEntry],
     age_category_id: int,
     ski_category_id: int,
     age_categories: dict[int, AgeCategory],
 ) -> tuple[int, bool]:
-    
+    yr_client = YRClient()
+    current_weather = yr_client.get_current_weather()
+
+    if current_weather:
+        reduction = 1
+
     for record in prices:
         if record.agecatid == age_category_id and record.skiid == ski_category_id:
-            reduction = get_price_reduction(age_category_id, age_categories)
+            if current_weather:
+                reduction = get_price_reduction(age_category_id,
+                                                age_categories,
+                                                current_weather.data.air_temperature
+                                                )
+            else:
+                reduction = 1
+
             price = round(record.price * reduction)
             price_reduced = record.price - price
             return price, price_reduced
