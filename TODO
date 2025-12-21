@@ -1,8 +1,19 @@
+Commentary on hard read code
+
 Add proper fault handle db_client
 Add if needed custom db_client exceptions
 
 Add units for weather print
 Add weather print to menu
+
+Fix better ask_for_age, age category handle perhaps choose closest range?
+
+Implement get_current_timzeone_time in YRClient
+Add proper expire check in check_cache_isvalid in YRClient 
+Fetch the actual current weather based on current time
+Add timezone conversions on time
+
+Fix prettier exception print
 
 Add posibility to choose custom destination
 Add default destinations
@@ -13,17 +24,6 @@ Add posibility to change any saved booking
 
 Add posibility to add customer info
 Add posibility to create customer account
-
-Fix better ask_for_age, age category handle perhaps choose closest range?
-
-Fix prettier exception print
-
-Implement get_current_timzeone_time in YRClient
-Add proper expire check in check_cache_isvalid in YRClient 
-Fetch the actual current weather based on current time
-Add timezone conversions on time
-
-Commentary on hard read code
 
 Restructure file structure
 

@@ -53,6 +53,7 @@ def hash_content(content: str):
 
 class YRClient:
 
+    #TODO allow destinations
     def get_current_weather(self) -> YRWeatherData | None:
         yr_data = self.request_weather()
         if not yr_data or not yr_data.timeseries_data:
@@ -67,7 +68,6 @@ class YRClient:
         return yr_data.timeseries_data[0].data
 
 
-    @classmethod
     def request_weather(self, alt: int = 0, lat: float = 56.6759, lon: float = 12.8582) -> YRData:
         filename = hash_content(str(alt)+str(lat)+str(lon)) + ".json"
         yr_cache = self.check_cache_isvalid(filename)
@@ -99,7 +99,6 @@ class YRClient:
         raise Exception(f"Unknown error fetching data, repsonse {response}")
 
 
-    @classmethod
     def get_units_data(self, data: Any) -> YRUnitMetadata:
         units = data.get("properties", {}).get("meta", {}).get("units", {})
 
@@ -109,12 +108,12 @@ class YRClient:
         return YRUnitMetadata.model_validate(units)
     
 
-    @classmethod
     def get_timeseries_data(self, data: Any) -> list[YRTimeWeatherData]:
         timeseries = data.get("properties", {}).get("timeseries", [])
         if not timeseries:
             raise ValueError("Invalid data, couldn't get timeseries from data.")
 
+        # List comprehension creating a list out of YRTimeWeatherData
         timeseries_data = [
             YRTimeWeatherData(
                 time=t.get("time", ""),
@@ -129,7 +128,6 @@ class YRClient:
         return timeseries_data
 
 
-    @classmethod
     def get_expire_date(self, headers: dict[Any]) -> datetime:
         date_format = "%a, %d %b %Y %H:%M:%S %Z"
         date = headers.get("Expires", "")
@@ -137,7 +135,6 @@ class YRClient:
         return datetime.strptime(date, date_format)
 
 
-    @classmethod
     def get_yr_data(self, headers: dict[Any], data: dict[Any]) -> YRData | None:
         units = self.get_units_data(data)
         timeseries_data = self.get_timeseries_data(data)
@@ -147,7 +144,6 @@ class YRClient:
         return YRData(last_modified=last_modified, expires=expires, units=units, timeseries_data=timeseries_data)
 
 
-    @classmethod
     def check_cache_isvalid(self, filename: str) -> YRData | None:
         data = self.load_cache(filename)
 
@@ -165,7 +161,6 @@ class YRClient:
         return data
 
 
-    @classmethod
     def save_cache(self, filename: str, yr_data: YRData) -> None:
         if not yr_data:
             return None
@@ -175,7 +170,6 @@ class YRClient:
                 f.write(yr_data.model_dump_json())
 
 
-    @classmethod
     def load_cache(self, filename: str) -> YRData | None:
         if not os.path.exists(filename):
             return None

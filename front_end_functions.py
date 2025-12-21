@@ -2,7 +2,12 @@ from db_client import AgeCategory, PriceEntry, SkiCategory
 from yr_client import YRWeatherData
 
 
+def print_divider() -> None:
+    print("="*80)
+
+
 def print_menu() -> None:
+    print_divider()
     print("\nPlease enter the number of your choice\n")
     print("Menu:")
     print("\"1\" List prices")
@@ -16,6 +21,7 @@ def list_prices(
     age_categories: dict[int, AgeCategory],
     ski_categories: dict[int, SkiCategory],
 ) -> None:
+    print_divider()
     print("\nPrice List:\n")
 
     for skiid in ski_categories.keys():
@@ -37,6 +43,7 @@ def list_prices(
 
 
 def print_age_categories(age_categories: dict[int, AgeCategory]) -> None:
+    print_divider()
     print("Age Categories:")
     for age_category_id, age_category in age_categories.items():
         print(f"{age_category_id}: {age_category.name} ({age_category.minage}-{age_category.maxage})")
@@ -44,6 +51,7 @@ def print_age_categories(age_categories: dict[int, AgeCategory]) -> None:
 
 
 def print_ski_categories(ski_categories: dict[int, SkiCategory]) -> None:
+    print_divider()
     print("Ski Categories:")
     for ski_category_id, ski_category in ski_categories.items():
         print(f"{ski_category_id}: {ski_category.name}")
@@ -57,6 +65,7 @@ def print_yr_licenses() -> None:
 
 #TODO Add units for weather data
 def print_weather_data(current_weather: YRWeatherData) -> None:
+    print_divider()
     print(f"Weather is:")
     print(f"Air pressure: {current_weather.air_pressure_at_sea_level}")
     print(f"Air temperature: {current_weather.air_temperature}")

@@ -1,6 +1,6 @@
 from db_client import AgeCategory, DatabaseClient, PriceEntry, SkiCategory
 from exceptions import AbortBookingException, AbortException
-from front_end_functions import list_prices, print_age_categories, print_ski_categories
+from front_end_functions import list_prices, print_age_categories, print_divider, print_ski_categories
 from pydantic import BaseModel
 from user_input_functions import ask_for_age, ask_for_amount_of_travelers, ask_for_ski_category
 from yr_client import YRClient, YRWeatherData
@@ -123,10 +123,12 @@ def create_booking(
 ) -> Booking | None:
     traveler_bookings: list[TravelerBooking] = []
     for traveler in range(1, travelers+1):
+        print_divider()
         print(f"Traveler {traveler}/{travelers}:")
         print_age_categories(age_categories)
         age_category_id = ask_for_age(age_categories)
 
+        #List comprehension, create a subset of age_categories filtered on age_category_id
         subset_age_categories = {k: age_categories[k] for k in age_categories if k == age_category_id}
         list_prices(prices, subset_age_categories, ski_categories)
 
@@ -162,9 +164,8 @@ def start_booking() -> Booking:
     ski_categories = db_client.fetch_ski_categories()
     db_client.close()
 
-    list_prices(prices, age_categories, ski_categories)
-
     try:
+        print_divider()
         travelers = ask_for_amount_of_travelers()
         booking = create_booking(travelers, prices, age_categories, ski_categories)
     except AbortException as e:
@@ -176,6 +177,7 @@ def start_booking() -> Booking:
 
 
 def print_booking(booking: Booking) -> None:
+    print_divider()
     print(f"\nBooking for {len(booking.traveler_bookings)} traveler(s)")
     print("Prices:\n")
 
