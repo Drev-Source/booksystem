@@ -32,7 +32,7 @@ def ask_for_amount_of_travelers() -> int:
         else:
             raise RetryException(f"Invalid input: {line}, please enter a number larger than 0")
     except RetryException as e:
-        print(repr(e))
+        print(e)
         return ask_for_amount_of_travelers()
 
 
@@ -49,7 +49,7 @@ def ask_for_age(age_categories: dict[int, AgeCategory]) -> int:
         else:
             raise RetryException(f"Invalid input: {line}, please enter age within listed ranges")
     except RetryException as e:
-        print(repr(e))
+        print(e)
         return ask_for_age(age_categories)
 
 
@@ -66,5 +66,5 @@ def ask_for_ski_category(ski_categories: dict[int, SkiCategory]) -> int:
         else:
             raise RetryException(f"Invalid input: {line}, please enter a listed number")
     except RetryException as e:
-        print(repr(e))
+        print(e)
         return ask_for_ski_category(ski_categories)
