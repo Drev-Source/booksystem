@@ -22,20 +22,35 @@ class PriceEntry(BaseModel):
     price: int
 
 
-#TODO Should probably use fault handling with exceptions here
+class SqlQueryException(Exception): ...
+
+
+class DatabaseConnectionException(Exception): ...
+
+
 class DatabaseClient:
     def __init__(self, host: str = "localhost", user: str = "test", password: str = "tester", database: str = "ski_db") -> None:
-        self.connection = mysql.connector.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database
-        )
+        try:
+            self.connection = mysql.connector.connect(
+                host=host,
+                user=user,
+                password=password,
+                database=database
+            )
+        except mysql.connector.Error as e:
+            print(e)
+            raise DatabaseConnectionException("Failed connecting to database")
+
         self.cursor = self.connection.cursor()
 
 
     def execute_query(self, query: str) -> Any:
-        self.cursor.execute(query)
+        try:
+            self.cursor.execute(query)
+        except mysql.connector.Error as e:
+            print(f"Error: {e}")
+            raise SqlQueryException(f"Something went wrong executing query {query}")
+
         return self.cursor.fetchall()
 
 

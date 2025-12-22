@@ -32,4 +32,4 @@ General functions to be used throughout the program.
 * **front_end.py**: Functionality to visualize information to the user.
 
 ## Docs
-CODEOWNER file and a TODO file with tasks for future implementation and improvements
+CODEOWNER file and a TODO file with tasks for future implementation and improvements.

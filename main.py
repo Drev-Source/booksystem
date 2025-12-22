@@ -20,7 +20,7 @@ def main() -> None:
         try:
             line = input("> ").strip()
         except EOFError as e:
-            print(repr(e))
+            print(e)
             break
 
         if not line:
@@ -48,9 +48,9 @@ def main() -> None:
                     current_booking = new_booking
                     print("Successfully created a new booking:")
             except AbortBookingException as e:
-                print(repr(e))
+                print(e)
             except ValueError as e:
-                print(repr(e))
+                print(e)
                 print("Recovering value error, continue program")
 
         elif cmd == "4": # Show booking

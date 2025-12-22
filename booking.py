@@ -1,4 +1,4 @@
-from clients.db_client import AgeCategory, DatabaseClient, PriceEntry, SkiCategory
+from clients.db_client import AgeCategory, DatabaseClient, DatabaseConnectionException, PriceEntry, SkiCategory, SqlQueryException
 from clients.yr_client import YRClient
 from front_end import list_prices, print_age_categories, print_divider, print_ski_categories
 from pydantic import BaseModel
@@ -61,7 +61,7 @@ def create_booking(
                                                             weather.data.air_temperature
                                                             )
         except ValueError as e:
-            print(repr(e))
+            print(e)
             print("Using default price 0")
             price = 0
             price_reduced = 0
@@ -81,11 +81,18 @@ def create_booking(
 
 def start_booking() -> Booking:
     # Fetch latest data
-    db_client = DatabaseClient()
-    prices = db_client.fetch_price_list()
-    age_categories = db_client.fetch_age_categories()
-    ski_categories = db_client.fetch_ski_categories()
-    db_client.close()
+    try:
+        db_client = DatabaseClient()
+        prices = db_client.fetch_price_list()
+        age_categories = db_client.fetch_age_categories()
+        ski_categories = db_client.fetch_ski_categories()
+        db_client.close()
+    except DatabaseConnectionException as e:
+        print(e)
+        raise AbortException("Cancel booking, failed to connect to database")
+    except SqlQueryException as e:
+        print(e)
+        raise AbortException("Cancel booking, couldn't fetch data")
 
     try:
         print_divider()

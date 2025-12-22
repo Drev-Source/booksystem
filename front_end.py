@@ -1,4 +1,4 @@
-from clients.db_client import AgeCategory, DatabaseClient, PriceEntry, SkiCategory
+from clients.db_client import AgeCategory, DatabaseClient, DatabaseConnectionException, PriceEntry, SkiCategory, SqlQueryException
 from clients.yr_client import YRWeatherInfo
 from utility.economy import get_old_price_reduction, get_young_price_reduction
 
@@ -46,11 +46,18 @@ def list_prices(
 
 def list_latest_prices() -> None:
     # Fetch latest data
-    db_client = DatabaseClient()
-    prices = db_client.fetch_price_list()
-    age_categories = db_client.fetch_age_categories()
-    ski_categories = db_client.fetch_ski_categories()
-    db_client.close()
+    try:
+        db_client = DatabaseClient()
+        prices = db_client.fetch_price_list()
+        age_categories = db_client.fetch_age_categories()
+        ski_categories = db_client.fetch_ski_categories()
+        db_client.close()
+    except DatabaseConnectionException as e:
+        print(e)
+        return
+    except SqlQueryException as e:
+        print(e)
+        return
 
     list_prices(prices, age_categories, ski_categories)
 

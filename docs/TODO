@@ -1,10 +1,9 @@
-Add proper fault handle db_client
-Add if needed custom db_client exceptions
-
 Implement get_current_timzeone_time in YRClient
 Add proper expire check in check_cache_isvalid in YRClient 
 Fetch the actual current weather based on current time
 Add timezone conversions on time
+
+Add fault handling to YR Client
 
 Add unit tests
 
@@ -26,7 +25,5 @@ Add posibility to create customer account
 Create better user interface
 
 Fix better ask_for_age, age category handle, perhaps choose closest range?
-
-Fix prettier exception print
 
 Add proper use of logs
