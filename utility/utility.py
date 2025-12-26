@@ -1,3 +1,5 @@
+import hashlib
+
 from clients.db_client import AgeCategory
 
 
@@ -32,3 +34,6 @@ def get_age_category_id(age: int, age_categories: dict[int, AgeCategory]) -> int
 
     return None
 
+
+def hash_content(content: str):
+        return hashlib.sha256(content.encode()).hexdigest()

@@ -32,7 +32,7 @@ def get_price_reduction(
         return get_old_price_reduction(temperature)
     else:
         return 1
-    
+
 
 def calculate_traveler_price(
     prices: list[PriceEntry],

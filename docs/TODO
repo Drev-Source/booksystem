@@ -1,29 +1,27 @@
-Implement get_current_timzeone_time in YRClient
-Add proper expire check in check_cache_isvalid in YRClient 
-Fetch the actual current weather based on current time
-Add timezone conversions on time
-
 Add fault handling to YR Client
 
-Add unit tests
+Add unit tests (should have done from start)
 
-Setup check for pull requests
+Setup check chain for pull requests
+
+Add proper use of logs
 
 Add price reduction info in booking process
 
-Add posibility to choose custom destination
+Add possibility to choose custom destination
 Add default destinations
 Add posibility to choose destination for weather print
 
-Add posibility to long term save booking
-Add posibility to save several bookings
-Add posibility to change any saved booking
+Add possibility to long term save booking
+Add possibility to save several bookings
+Add possibility to change any saved booking
 
-Add posibility to add customer info
-Add posibility to create customer account
+Add possibility to add customer info
+Add possibility to create customer account
 
 Create better user interface
 
 Fix better ask_for_age, age category handle, perhaps choose closest range?
 
-Add proper use of logs
+Add proper timezone conversion to get_current_weather
+Add timezone info for timeseries data

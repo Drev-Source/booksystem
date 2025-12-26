@@ -44,7 +44,7 @@ def create_booking(
         print_age_categories(age_categories)
         age_category_id = ask_for_age(age_categories)
 
-        #List comprehension, create a subset of age_categories filtered on age_category_id
+        # Dict comprehension, create a subset of age_categories filtered on age_category_id
         subset_age_categories = {k: age_categories[k] for k in age_categories if k == age_category_id}
         list_prices(prices, subset_age_categories, ski_categories)
 

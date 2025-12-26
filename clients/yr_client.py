@@ -1,4 +1,3 @@
-import hashlib
 import json
 import os
 import requests
@@ -6,6 +5,8 @@ import requests
 from datetime import datetime
 from pydantic import BaseModel
 from typing import Any
+from utility.time import convert_time_to_utc, get_current_local_utc_time
+from utility.utility import hash_content
 
 
 Response = requests.Response
@@ -36,42 +37,39 @@ class YRWeatherInfo(BaseModel):
 
 
 class YRTimeWeatherData(BaseModel):
-    time: str
+    time: datetime
     data: YRWeatherData
 
 
 class YRData(BaseModel):
     last_modified: str
-    expires: datetime
+    expires: str
     units: YRUnitMetadata
     timeseries_data: list[YRTimeWeatherData]
 
 
-def get_current_timzeone_time(timezone: str) -> None:
-    #TODO Implement this
-    raise NotImplementedError("Function is not implemented")
-
-
-def hash_content(content: str):
-        return hashlib.sha256(content.encode()).hexdigest()
-
-
 class YRClient:
 
-    #TODO allow destinations
     def get_current_weather(self) -> YRWeatherInfo | None:
         yr_data = self.request_weather()
         if not yr_data or not yr_data.timeseries_data:
             return None
-        
-        #TODO return the acutal current weather data based on current time
-        #current_gmt_time = get_current_timzeone_time("gmt")
-        #for data in yr_data.timeseries_data:
-        #    if data.time.hour == current_gmt_time.hour:
-        #       return data
+
+        local_utc = get_current_local_utc_time()
+        units = yr_data.units
+        for time_data in yr_data.timeseries_data:
+            # Time series data from request does not provide
+            # timezone data and is not to be assumed to be
+            # equivalent to utc.
+            # We could assume it is utc, which is incorrect
+            # or we could assume it is of same timezone that is
+            # used in the request header which is GMT.
+            # Luckily GMT and UTC should provide close to
+            # the same time.
+            if time_data.time.hour == local_utc.hour:
+               return YRWeatherInfo(data=time_data.data, units=units)
 
         data = yr_data.timeseries_data[0].data
-        units = yr_data.units
         return YRWeatherInfo(data=data, units=units)
 
 
@@ -79,9 +77,8 @@ class YRClient:
         filename = hash_content(str(alt)+str(lat)+str(lon)) + ".json"
         yr_cache = self.check_cache_isvalid(filename)
 
-        #TODO Incorporate proper check for the expiration
-        #if yr_cache:
-        #    return yr_cache
+        if yr_cache:
+            return yr_cache
 
         last_modified = yr_cache.last_modified if yr_cache else ""
         headers = {
@@ -95,14 +92,14 @@ class YRClient:
         }
         response = requests.get(BASE_URL, headers=headers, params=params)
         response.raise_for_status()
-        
+
         if response.status_code == 200:
             yr_data = self.get_yr_data(response.headers, response.json())
             self.save_cache(filename, yr_data)
             return yr_data
         elif response.status_code == 304:
             return yr_cache
-        
+
         raise Exception(f"Unknown error fetching data, repsonse {response}")
 
 
@@ -111,9 +108,9 @@ class YRClient:
 
         if not units:
             raise ValueError("Invalid data, couldn't get unit metadata from data.")
-        
+
         return YRUnitMetadata.model_validate(units)
-    
+
 
     def get_timeseries_data(self, data: Any) -> list[YRTimeWeatherData]:
         timeseries = data.get("properties", {}).get("timeseries", [])
@@ -123,7 +120,7 @@ class YRClient:
         # List comprehension creating a list out of YRTimeWeatherData
         timeseries_data = [
             YRTimeWeatherData(
-                time=t.get("time", ""),
+                time=convert_time_to_utc(t.get("time", "")),
                 data=YRWeatherData.model_validate(t.get("data", {}).get("instant", {}).get("details", {}))
             )
             for t in timeseries
@@ -131,15 +128,16 @@ class YRClient:
 
         if not timeseries_data:
             raise ValueError("Invalid data, couldn't get timeseries data from data.")
-        
+
         return timeseries_data
 
 
     def get_expire_date(self, headers: dict[Any]) -> datetime:
         date_format = "%a, %d %b %Y %H:%M:%S %Z"
-        date = headers.get("Expires", "")
+        time = headers.get("Expires", "")
+        expires_utc = convert_time_to_utc(time)
 
-        return datetime.strptime(date, date_format)
+        return datetime.strftime(expires_utc, date_format)
 
 
     def get_yr_data(self, headers: dict[Any], data: dict[Any]) -> YRData | None:
@@ -157,15 +155,12 @@ class YRClient:
         if not data:
            return None
 
-        #TODO implement this
-        #if data.expiration < get_current_timzeone_time("gmt"):
-        #   print("Weather data cache expired")
-        #   return None
-        #else:
-        #   print("Valid weather data cache exists")
-        #   return data
-
-        return data
+        if convert_time_to_utc(data.expires) < get_current_local_utc_time():
+           print("Weather data cache expired")
+           return None
+        else:
+           print("Valid weather data cache exists")
+           return data
 
 
     def save_cache(self, filename: str, yr_data: YRData) -> None:
