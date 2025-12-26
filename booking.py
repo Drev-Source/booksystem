@@ -89,10 +89,10 @@ def start_booking() -> Booking:
         db_client.close()
     except DatabaseConnectionException as e:
         print(e)
-        raise AbortException("Cancel booking, failed to connect to database")
+        raise AbortBookingException("Cancel booking, failed to connect to database")
     except SqlQueryException as e:
         print(e)
-        raise AbortException("Cancel booking, couldn't fetch data")
+        raise AbortBookingException("Cancel booking, couldn't fetch data")
 
     try:
         print_divider()
