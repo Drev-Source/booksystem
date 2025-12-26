@@ -24,6 +24,7 @@ General functions to be used throughout the program.
 * **economy.py**: Functionality to calculate prices and price reductions.
 * **exceptions.py**: Custom exceptions
 * **utlity.py**: General purpose functions, mainly related to processing age categories
+* **time.py**: Time and date functionality
 
 ### root
 * **main.py**: Main program
