@@ -3,6 +3,7 @@ Add fault handling to YR Client
 Add unit tests (should have done from start)
 
 Setup check chain for pull requests
+Setup deploy chain for pull requests
 
 Add proper use of logs
 
