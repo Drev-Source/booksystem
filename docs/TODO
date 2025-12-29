@@ -7,8 +7,12 @@ Setup deploy chain for pull requests
 
 Add proper use of logs
 
+Add possibility to connect to any db other than default
+Add possibility to login as any user other than default
+
 Add price reduction info in booking process
 
+Fix float params are rounded before being used
 Add possibility to choose custom destination
 Add default destinations
 Add posibility to choose destination for weather print
